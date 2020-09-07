@@ -1,8 +1,8 @@
 #pragma once
 /*
 * @class CStmtTool
-* @brief CStmtToolÓÃÓÚÓëSQLiteÊı¾İ¿â½øĞĞ½»»¥£¬Ò»¸öCStmtTool¶ÔÏó´ú±íÒ»¸öÓï¾ä
-* @discussion ±àĞ´´ËÀà¿ÉÒÔ·Å¿ª¹ÜÀíStmt¶ÔÏóµÄÏú»Ù¹¤×÷£¬ÓÉunique_ptrÀ´Íê³É£¬±ÜÃâ¸ü¶à´íÎó
+* @brief CStmtToolï¿½ï¿½ï¿½ï¿½ï¿½ï¿½SQLiteï¿½ï¿½ï¿½İ¿ï¿½ï¿½ï¿½Ğ½ï¿½ï¿½ï¿½ï¿½ï¿½Ò»ï¿½ï¿½CStmtToolï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ò»ï¿½ï¿½ï¿½ï¿½ï¿½
+* @discussion ï¿½ï¿½Ğ´ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ô·Å¿ï¿½ï¿½ï¿½ï¿½ï¿½Stmtï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ù¹ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½unique_ptrï¿½ï¿½ï¿½ï¿½É£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 * @see
 *
 */
@@ -12,20 +12,19 @@ enum ENCODE
 	UTF8,
 	UTF16
 };
-typedef void*(*callbackFunc)(void*);
 class CStmtTool {
-
 private:
-
+	int m_RetCode;//ï¿½ï¿½ï¿½Ö´ï¿½ï¿½ï¿½ï¿½ï¿½Ä·ï¿½ï¿½Ø½ï¿½ï¿½
 	char * m_StmtStr;
-	int m_size;//Ô­Ê¼×Ö·û´®ËùÕ¼ÓÃµÄ×Ö½Ú´óĞ¡
+	int m_size;//Ô­Ê¼ï¿½Ö·ï¿½ï¿½ï¿½ï¿½ï¿½Õ¼ï¿½Ãµï¿½ï¿½Ö½Ú´ï¿½Ğ¡
 	sqlite3_stmt * m_Stmt;
+protected:
+	void finalize();
 public:
-	int m_RetCode; //×î½üÖ´ĞĞÓï¾äµÄ·µ»Ø½á¹û
+	int GetRetCode();
 	CStmtTool(sqlite3* db, const char * str, int strSize, ENCODE) noexcept;
 	~CStmtTool();
 	void  step();
-	void finalize();
 	void changeStmt(sqlite3 * db,const char* str, int strSize, ENCODE);
 	const unsigned char * column_text(int icol);
 	int column_int(int icol);
