@@ -78,5 +78,5 @@ void CStmtTool::operator()() {
 int CStmtTool::GetRetCode(){
 	int tmp = m_RetCode;
 	m_RetCode = -1;//赋值为-1，是由于SQLITE3 C++API的宏定义都是大于等于0的
-	return m_RetCode; 
+	return tmp; 
 }
