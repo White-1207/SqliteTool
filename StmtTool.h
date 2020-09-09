@@ -1,18 +1,22 @@
 #pragma once
-/*
-* @class CStmtTool
-* @brief CStmtTool 用来操纵sqlite3_stmt对象
-* @discussion 一个CStmtTool对应一个sqlite3_stmt对象
-* @author Jp
-*
+
+#include "include\sqlite3.h"
+/* 
+* @brief 指定UTF-8或UTF-16编码创建的数据库
 */
-#include "sqlite3.h"
-//指定UTF-8或UTF-16编码创建的数据库
 enum ENCODE
 {
 	UTF8,
 	UTF16
 };
+/*
+* @class CStmtTool
+* @brief CStmtTool 用来操纵sqlite3_stmt对象
+
+* 一个CStmtTool对应一个sqlite3_stmt对象
+* @author Jp
+*
+*/
 class CStmtTool {
 private:
 	/*标识一次sqlite3函数关于此sqlite3_stmt的执行状态，用户取得一次执行结果后，应当保存此结果（如果希望以后使用此结果的话，否则将会丢失此结果）*/
@@ -24,6 +28,9 @@ protected:
 	void finalize();
 public:
 	int GetRetCode();
+	/*构造一个空的CStmtTool 对象*/
+	CStmtTool() noexcept;
+	/*构造一个立即可以使用的CStmtTool对象*/
 	CStmtTool(sqlite3* db, const char * str, int strSize, ENCODE code) noexcept;
 	~CStmtTool();
 	/*执行*/
@@ -36,4 +43,9 @@ public:
 	const unsigned char * column_text(int icol);
 	/*取得一个int结果*/
 	int column_int(int icol);
+	
+	/*查看返回Code*/
+	bool isOK(int sqliteVal);
+	bool operator==(int sqliteVal);
+	bool operator!=(int sqliteVal);
 };

@@ -1,5 +1,5 @@
 #include "StmtTool.h"
-#include <stdlib.h>
+#include <string.h>
 
 CStmtTool::CStmtTool(sqlite3* db, const char * str, int strSize, ENCODE code) noexcept
 	:m_size(strSize), m_Stmt(nullptr), m_StmtStr(nullptr), m_RetCode(-1)
@@ -19,6 +19,11 @@ CStmtTool::CStmtTool(sqlite3* db, const char * str, int strSize, ENCODE code) no
 		m_RetCode = sqlite3_prepare16_v2(db, m_StmtStr, sizeof(m_StmtStr), &m_Stmt, NULL);
 	}
 }
+CStmtTool::CStmtTool() noexcept
+	:m_size(0),m_Stmt(nullptr),m_StmtStr(nullptr),m_RetCode(-1)
+{
+	
+}
 
 void  CStmtTool::step() {
 	m_RetCode = sqlite3_step(m_Stmt);
@@ -33,6 +38,8 @@ void CStmtTool::finalize() {
 		delete[] m_StmtStr;
 	}
 	m_StmtStr = nullptr;
+	m_size = 0;
+	m_RetCode = -1;
 }
 CStmtTool::~CStmtTool() {
 	finalize();
@@ -79,4 +86,19 @@ int CStmtTool::GetRetCode(){
 	int tmp = m_RetCode;
 	m_RetCode = -1;//赋值为-1，是由于SQLITE3 C++API的宏定义都是大于等于0的
 	return tmp; 
+}
+
+bool CStmtTool::isOK(int sqliteVal){
+	if(GetRetCode()==sqliteVal){
+		return true;
+	}
+	return false;
+}
+
+bool CStmtTool::operator==(int sqliteVal){
+	return isOK(sqliteVal);
+}
+
+bool CStmtTool::operator!=(int sqliteVal){
+	return !isOK(sqliteVal);
 }
