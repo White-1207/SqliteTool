@@ -48,7 +48,7 @@ int CCode::MutliToMutli(const  char * iSocMutliStr, int iSize, UINT iSocCodePage
 	 1 调用AllocToWide 分配转换为UTF-16所需的内存
 	 2 调用CodeToWide 执行转换
 	* localvariable pWide 指向保存转为UTF-16的字符串的地址
-	* localvariable wideSize 保存转换为UTF-16所需的内存大小，以字节为单位
+	* localvariable wideSize 保存转换为UTF-16所需的内存大小，以字符大小为单位(wchar_t)
 	*/
 	int wideSize = 0;
 	wchar_t * pWide;

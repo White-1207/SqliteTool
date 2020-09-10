@@ -18,7 +18,7 @@ protected:
 	/*
 	* @brief 分配将iSocStr指向的多字节字符串由iCodePage执行转换所需的内存
 	* @return  ipDesStr 分配的内存起始地址
-	* @return 函数返回值大于0表示分配的内存大小，返回0表示分配内存失败
+	* @return 函数返回值大于0表示分配的内存大小，返回0表示分配内存失败，单位为字符大小（wchar_t)
 	*/
 	int AllocToWide(const char * iSocStr, int iSize, UINT iCodePage, wchar_t *& iDesStr);
 	/*
@@ -30,7 +30,7 @@ protected:
 	/*
 	* @brief 分配将iSocStr指向的宽字节字符串由iCodePage执行转换所需的内存
 	* @return  ipDesStr 分配的内存起始地址
-	* @return 函数返回值大于0表示分配的内存大小，返回0表示分配内存失败
+	* @return 函数返回值大于0表示分配的内存大小，返回0表示分配内存失败，单位为字节大小（char）
 	*/
 	int AllocToMutli(const wchar_t * iSocStr, int iSize, UINT iCodePage, char *& iDesStr);
 	/*
@@ -46,7 +46,7 @@ public:
 	virtual ~CCode();
 	/*
 	* @brief 由多字节转为多字节
-	由多字节转为多字节需要先将源多字节转为宽字节，然后转为目的多字节
+	由多字节转为多字节，需要先将源多字节字符串转为宽字节编码，然后转为目的多字节编码
 	* @param iMutliStr 指向需要转换的源字符串指针
 	* @param iSize 需要转换的源字符串的大小
 	* @param iDesCodePage 需要到转换的目的编码页

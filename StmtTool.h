@@ -42,9 +42,17 @@ public:
 	void changeStmt(sqlite3 * db, const char* str, int strSize, ENCODE);
 	/*
 	* @brief 绑定参数
-	* @param socCodePage 指定
+	用于将ANSI编码的字符串str转换为type指定的编码格式，然后绑定到sqlite3_stmt
+	* @param index指定要绑定的参数在sql语句中的位置
+	* @param str指定ANSI编码的字符串
+	* @param size str指定的字符串的长度，单位为字节
 	*/
-	void bind_text_ANSI(int index, const char *, int size, void(*)(void*),ENCODE type);
+	void bind_text_ANSI(int index, const char * str, int size, void(*func)(void*),ENCODE type);
+	/*
+	* @brief 获取字符串结果
+	用于将type指定的编码结果字符串，转为ANSI编码的字符串，然后返回
+	* @param icol 指定要获取的结果的行
+	*/
 	const unsigned char * column_text_ANSI(int icol,ENCODE type);
 	/*取得一个int结果*/
 	int column_int(int icol);
