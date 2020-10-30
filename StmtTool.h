@@ -1,65 +1,60 @@
 #pragma once
-
-#include "include\sqlite3.h"
-#include "code.h"
 /*
-* @brief æŒ‡å®šUTF-8æˆ–UTF-16ç¼–ç åˆ›å»ºçš„æ•°æ®åº“
+* @class CStmtTool
+* @brief CStmtToolÓÃÓÚÓëSQLiteÊı¾İ¿â½øĞĞ½»»¥£¬Ò»¸öCStmtTool¶ÔÏó´ú±íÒ»¸öÓï¾ä
+* @discussion ±àĞ´´ËÀà¿ÉÒÔ·Å¿ª¹ÜÀíStmt¶ÔÏóµÄÏú»Ù¹¤×÷£¬ÓÉunique_ptrÀ´Íê³É£¬±ÜÃâ¸ü¶à´íÎó
+* @see
+*
 */
+
+
+#include "include/sqlite3.h"
+#include <memory>
 enum ENCODE
 {
 	UTF8,
 	UTF16
 };
-/*
-* @class CStmtTool
-* @brief CStmtTool ç”¨æ¥æ“çºµsqlite3_stmtå¯¹è±¡
-
-* ä¸€ä¸ªCStmtToolå¯¹åº”ä¸€ä¸ªsqlite3_stmtå¯¹è±¡
-* @author Jp
-*
-*/
 class CStmtTool {
+public:
+	enum class ErrorCode {
+		SUCCESS = 0,
+		STMTERROR,
+		INVALIDARG,
+		UNSUCCESS
+	};
 private:
-	/* @breif æ ‡è¯†ä¸€æ¬¡sqlite3å‡½æ•°å…³äºæ­¤sqlite3_stmtçš„æ‰§è¡ŒçŠ¶æ€ï¼Œç”¨æˆ·å–å¾—ä¸€æ¬¡æ‰§è¡Œç»“æœåï¼Œ
-	*  åº”å½“ä¿å­˜æ­¤ç»“æœï¼ˆå¦‚æœå¸Œæœ›ä»¥åä½¿ç”¨æ­¤ç»“æœçš„è¯ï¼Œå¦åˆ™å°†ä¼šä¸¢å¤±æ­¤ç»“æœï¼‰
-	*/
+	/*±êÊ¶Ò»´Îsqlite3º¯Êı¹ØÓÚ´Ësqlite3_stmtµÄÖ´ĞĞ×´Ì¬£¬ÓÃ»§È¡µÃÒ»´ÎÖ´ĞĞ½á¹ûºó£¬Ó¦µ±±£´æ´Ë½á¹û£¨Èç¹ûÏ£ÍûÒÔºóÊ¹ÓÃ´Ë½á¹ûµÄ»°£¬·ñÔò½«»á¶ªÊ§´Ë½á¹û£©*/
 	int m_RetCode;
 	char * m_StmtStr;
 	int m_size;
 	sqlite3_stmt * m_Stmt;
-	CCode code;
 protected:
 	void finalize();
 public:
 	int GetRetCode();
+	/*¿Õ¹¹Ôìº¯Êı*/
+	CStmtTool() noexcept;
 	CStmtTool(sqlite3* db, const char * str, int strSize, ENCODE code) noexcept;
 	~CStmtTool();
-	/*æ‰§è¡Œ*/
+	/*Ö´ĞĞ*/
 	void  step();
-	/*æ‰§è¡Œ*/
+	/*Ö´ĞĞ*/
 	void operator() ();
-	/*æ”¹å˜æ­¤CStmtToolå¯¹è±¡å¯¹åº”çš„SQLè¯­å¥*/
+	/*¸Ä±ä´ËCStmtTool¶ÔÏó¶ÔÓ¦µÄSQLÓï¾ä*/
 	void changeStmt(sqlite3 * db, const char* str, int strSize, ENCODE);
-	/*
-	* @brief ç»‘å®šå‚æ•°
-	ç”¨äºå°†ANSIç¼–ç çš„å­—ç¬¦ä¸²strè½¬æ¢ä¸ºtypeæŒ‡å®šçš„ç¼–ç æ ¼å¼ï¼Œç„¶åç»‘å®šåˆ°sqlite3_stmt
-	* @param indexæŒ‡å®šè¦ç»‘å®šçš„å‚æ•°åœ¨sqlè¯­å¥ä¸­çš„ä½ç½®
-	* @param stræŒ‡å®šANSIç¼–ç çš„å­—ç¬¦ä¸²
-	* @param size stræŒ‡å®šçš„å­—ç¬¦ä¸²çš„é•¿åº¦ï¼Œå•ä½ä¸ºå­—èŠ‚
-	*/
-	void bind_text_ANSI(int index, const char * str, int size, void(*func)(void*),ENCODE type);
-	/*
-	* @brief è·å–å­—ç¬¦ä¸²ç»“æœ
-	ç”¨äºå°†typeæŒ‡å®šçš„ç¼–ç ç»“æœå­—ç¬¦ä¸²ï¼Œè½¬ä¸ºANSIç¼–ç çš„å­—ç¬¦ä¸²ï¼Œç„¶åè¿”å›
-	* @param icol æŒ‡å®šè¦è·å–çš„ç»“æœçš„è¡Œ
-	*/
-	const unsigned char * column_text_ANSI(int icol,ENCODE type);
-	/*å–å¾—ä¸€ä¸ªintç»“æœ*/
+	/*È¡µÃÒ»¸ötext½á¹û£¬ÒÔconst unsigned char*µÄĞÎÊ½·µ»Ø*/
+	const unsigned char * column_text(int icol);
+	/*È¡µÃÒ»¸öint½á¹û*/
 	int column_int(int icol);
-	/*æ‰§è¡Œæ˜¯å¦æˆåŠŸ */
 	bool isOK(int sqliteVal);
-	/*æ‰§è¡Œæ˜¯å¦æˆåŠŸ*/
-	bool operator==(int sqliteVal);
-	/*æ‰§è¡Œæ˜¯å¦æˆåŠŸ*/
-	bool operator!=(int sqliteVal);
+	bool operator == (int sqliteVal);
+	bool operator!= (int sqliteVal);
+	/*Ö´ĞĞÒ»¸öÎŞ·µ»ØÓï¾ä*/
+	ErrorCode exec(sqlite3 * db, const char * cstr, ENCODE code, int size);
+	/*»ñÈ¡µ¥ĞĞµ¥¸öÊıÖµÊı¾İ*/
+	ErrorCode exec(sqlite3 * db, const char * cstr, int size, ENCODE code, int * retVal , int pos);
+	/*»ñÈ¡µ¥ĞĞµ¥¸öÎÄ±¾Êı¾İ*/
+	ErrorCode exec(sqlite3 * db, const char * cstr, int size, ENCODE code, const unsigned char ** retVal,int pos);
+	
 };

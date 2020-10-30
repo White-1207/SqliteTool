@@ -1,6 +1,11 @@
+#include "stdafx.h"
 #include "StmtTool.h"
-#include <string.h>
+#include "windows.h"
+CStmtTool::CStmtTool() noexcept
+	:m_size(0),m_Stmt(nullptr),m_StmtStr(nullptr),m_RetCode(-1)
+{
 
+}
 CStmtTool::CStmtTool(sqlite3* db, const char * str, int strSize, ENCODE code) noexcept
 	:m_size(strSize), m_Stmt(nullptr), m_StmtStr(nullptr), m_RetCode(-1)
 {
@@ -33,28 +38,17 @@ void CStmtTool::finalize() {
 		delete[] m_StmtStr;
 	}
 	m_StmtStr = nullptr;
+	m_size = 0;
+	m_RetCode = -1;
 }
 CStmtTool::~CStmtTool() {
 	finalize();
 }
 
-const unsigned char* CStmtTool::column_text_ANSI(int icol,ENCODE type) {
-	char * desMutliAnsi = nullptr;
-	int numAnsi = 0;
-	int sizeUtf8 = 1;//sqlite3_column_text 返回的字符串即使是空字符串，也是由0结尾的，因此，其返回值长度至少为1 
-	//语句不存在，返回nullptr;
-	if (m_Stmt == nullptr) {
-		return nullptr;
+const unsigned char* CStmtTool::column_text(int icol) {
+	if (m_Stmt != nullptr) {
+		return sqlite3_column_text(m_Stmt, icol);
 	}
-	if (type == UTF8) {
-		const char * socMutliUtf8 = (const char *)sqlite3_column_text(m_Stmt, icol);
-		for (int i = 0; socMutliUtf8[i] != 0; i++) {
-			sizeUtf8++;
-		}
-		numAnsi = code.MutliToMutli(socMutliUtf8, sizeUtf8, CP_UTF8, CP_ACP, desMutliAnsi);
-		return (const unsigned char*)desMutliAnsi;
-	}
-	//暂时未定义utf16和utf32
 	return nullptr;
 }
 
@@ -66,7 +60,7 @@ int CStmtTool::column_int(int icol) {
 	return 0;
 }
 
-void CStmtTool::changeStmt(sqlite3 * db, const char* str, int strSize, ENCODE code) {
+void CStmtTool::changeStmt(sqlite3 * db,const char* str, int strSize, ENCODE code) {
 	finalize();
 	if (db == nullptr) {
 		m_RetCode = SQLITE_ERROR;
@@ -90,7 +84,7 @@ void CStmtTool::operator()() {
 
 int CStmtTool::GetRetCode() {
 	int tmp = m_RetCode;
-	m_RetCode = -1;//赋值为-1，是由于SQLITE3 C++API的宏定义都是大于等于0的
+	m_RetCode = -1;//��ֵΪ-1��������SQLITE3 C++API�ĺ궨�嶼�Ǵ��ڵ���0��
 	return tmp;
 }
 
@@ -100,28 +94,85 @@ bool CStmtTool::isOK(int sqliteVal) {
 	}
 	return false;
 }
-
-bool CStmtTool::operator==(int sqliteVal) {
+bool CStmtTool:: operator == (int sqliteVal) {
 	return isOK(sqliteVal);
 }
-
-bool CStmtTool::operator!=(int sqliteVal) {
+bool CStmtTool:: operator != (int sqliteVal) {
 	return !isOK(sqliteVal);
 }
 
-void CStmtTool::bind_text_ANSI(int index, const char *str, int size, void(*func)(void*),ENCODE type) {
-	char * desStr = nullptr;
-	int num = 0;
-	UINT desCodePage = 0;
-	if (type == UTF8) {
-		num = code.MutliToMutli(str, size, CP_ACP, CP_UTF8, desStr);
+CStmtTool::ErrorCode CStmtTool::exec(sqlite3 * db, const char * cstr, ENCODE code, int size)
+{
+	ErrorCode eCode = ErrorCode::SUCCESS;
+	changeStmt(db, cstr, size, code);
+	if (isOK(SQLITE_OK))
+	{
+		step();
+		if (isOK(SQLITE_DONE))
+		{
+			eCode = ErrorCode::SUCCESS;
+		}
+		else
+		{
+			eCode = ErrorCode::UNSUCCESS;
+		}
 	}
-	if (num == 0) {
-		m_RetCode = -1;
-		return;
+	else
+	{
+		eCode = ErrorCode::STMTERROR;
 	}
-	if (m_Stmt == nullptr) {
-		m_RetCode = -1;
-	}
-	m_RetCode = sqlite3_bind_text(m_Stmt, index, desStr, num, func);
+	return eCode;
 }
+
+CStmtTool::ErrorCode CStmtTool::exec(sqlite3 * db, const char * cstr, int size, ENCODE code, int * retVal, int pos)
+{
+	//�ٶ�retValָ����Ч��ַ
+	ErrorCode eCode = ErrorCode::SUCCESS;
+	changeStmt(db, cstr, size, code);
+	if (isOK(SQLITE_OK))
+	{
+		step();
+		if (isOK(SQLITE_DONE))
+		{
+			(*retVal) = column_int(pos);
+			eCode = ErrorCode::UNSUCCESS;
+		}
+		else
+		{
+			eCode = ErrorCode::UNSUCCESS;
+		}
+	}
+	else
+	{
+		eCode = ErrorCode::STMTERROR;
+	}
+	return eCode;
+}
+
+CStmtTool::ErrorCode CStmtTool::exec(sqlite3 * db, const char * cstr, int size, ENCODE code, const unsigned char ** retVal, int pos)
+{
+	//�ٶ�retValָ����Ч��ַ
+	ErrorCode eCode = ErrorCode::SUCCESS;
+	changeStmt(db, cstr, size, code);
+	if (isOK(SQLITE_OK))
+	{
+		step();
+		if (isOK(SQLITE_DONE))
+		{
+			(*retVal) = column_text(pos);
+			eCode = ErrorCode::UNSUCCESS;
+		}
+		else
+		{
+			eCode = ErrorCode::UNSUCCESS;
+		}
+	}
+	else
+	{
+		eCode = ErrorCode::STMTERROR;
+	}
+	return eCode;
+}
+
+
+
